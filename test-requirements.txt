@@ -1,0 +1,5 @@
+numpy
+Pillow
+sounddevice
+ffmpeg-python
+imageio
