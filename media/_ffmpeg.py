@@ -74,7 +74,10 @@ class VIDEO():
             if com[0] == "wait":
                 com = self.command_q.get(timeout=com[1])
             elif com[0] == "load":
-                self.buffer.put(Image.frombuffer("RGBA", (self.info["width"],self.info["height"]), self.process.stdout.read(self.info["width"] * self.info["height"] * 4), "raw"))
+                try :
+                    self.buffer.put(Image.frombuffer("RGBA", (self.info["width"],self.info["height"]), self.process.stdout.read(self.info["width"] * self.info["height"] * 4), "raw"))
+                except ValueError:
+                    break
             elif com[0] == "pass":
                 time.sleep(0.0001)
             elif com[0] == "exit":
