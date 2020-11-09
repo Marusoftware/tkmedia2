@@ -55,7 +55,7 @@ class VIDEO():
             self._ffmpeg = ffmpeg.input(self.filename)
             self._ffmpeg = self._ffmpeg.output('pipe:', format='rawvideo', pix_fmt='rgba')
             self.process = self._ffmpeg.run_async(pipe_stdin=pipe_stdin, pipe_stdout=pipe_stdout, pipe_stderr=pipe_stderr)
-            for i in range(100):
+            for i in range(200):
                 self.command_q.put(["load"])
             self.thread = threading.Thread(target=self._LOAD)
             self.thread.start()

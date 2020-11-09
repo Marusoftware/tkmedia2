@@ -25,6 +25,9 @@ class Video():
             if self.frame_now != 0:
                 self.canvas.delete("image")
             self.image = self._ffmpeg.READ_TK(self.canvas, block=True)
+            print(self._ffmpeg.buffer.qsize())
+            if self._ffmpeg.buffer.qsize() < 100:
+                print(self._ffmpeg.command_q.qsize())
             self.canvas.create_image(0, 0, anchor="nw", image=self.image, tags="image")
             self.frame_now = self.frame_now + 1
             self.aid = self.canvas.after(int(self.wait_time), self._player_canvas)

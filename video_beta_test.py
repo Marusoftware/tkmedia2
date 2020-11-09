@@ -6,7 +6,7 @@ def b1_handle():
     m._ffmpeg.command_q.put("exit")
     m.canvas.after_cancel(m.aid)
     r.destroy()
-    sys.exit()
+    exit()
 
 status = 0
 
@@ -15,13 +15,13 @@ def b2_handle():
     if status:
         m._ffmpeg.command_q.put("start")
         m._ffmpeg.command_q.put("load")
+        m.canvas.destroy()
         m.player_canvas(r)
         b2.configure(text="stop")
         status = 0
     else:
         m._ffmpeg.command_q.put("stop")
         m.canvas.after_cancel(m.aid)
-        m.canvas.destroy()
         b2.configure(text="start")
         status = 1
 
