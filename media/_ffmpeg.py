@@ -46,14 +46,16 @@ class VIDEO():
         if mode == "rw":
             self.mode = "rw"
 
-    def LOAD(self, pipe_stdin=True, pipe_stdout=True, pipe_stderr=True):
+    def LOAD(self, pipe_stdin=True, pipe_stdout=True, pipe_stderr=True, default_com=["wait",2]):
         """
         Load Video file
         pipe_stdin , pipe_stdout , pipe_stderr : bool
         """
         if self.mode == "r" or self.mode == "rw":
+            self.default_com = default_com
             self._ffmpeg = ffmpeg.input(self.filename)
             self._ffmpeg = self._ffmpeg.output('pipe:', format='rawvideo', pix_fmt='rgba')
+            self._ffmpeg = self._ffmpeg.global_args('-hide_banner', '-nostats', '-loglevel', 'panic')
             self.process = self._ffmpeg.run_async(pipe_stdin=pipe_stdin, pipe_stdout=pipe_stdout, pipe_stderr=pipe_stderr)
             for i in range(200):
                 self.command_q.put(["load"])
@@ -68,14 +70,19 @@ class VIDEO():
             try:
                 com = self.command_q.get_nowait()
             except queue.Empty:
-                com = ["pass"]
+                com = self.default_com
             else:
                 self.command_q.task_done()
+
             if com[0] == "wait":
-                com = self.command_q.get(timeout=com[1])
-            elif com[0] == "load":
+                try:
+                    com = self.command_q.get(timeout=com[1])
+                except queue.Empty:
+                    com = self.default_com
+            if com[0] == "load":
                 try :
                     self.buffer.put(Image.frombuffer("RGBA", (self.info["width"],self.info["height"]), self.process.stdout.read(self.info["width"] * self.info["height"] * 4), "raw"))
+                    #print("put")
                 except ValueError:
                     break
             elif com[0] == "pass":
@@ -92,17 +99,22 @@ class VIDEO():
             self.__ffmpeg = ffmpeg.input("pipe")
             return self.buffer
     
-    def READ(self):
+    def READ(self, block=False):
         if self.mode == "r" or self.mode == "rw":
             self.command_q.put(["load"])
-            buffer = self.buffer.get_nowait()
+            #self.command_q.put(["load"])
+            buffer = self.buffer.get(block=block)
             self.buffer.task_done()
             return buffer
     
     def READ_TK(self, master, block=False):
         if self.mode == "r" or self.mode == "rw":
             self.command_q.put(["load"])
+            #self.command_q.put(["load"])
+            image=self.buffer.get(block=block)
             buffer = ImageTk.PhotoImage(self.buffer.get(block=block), master=master)
+            image.close()
+            #print("get")
             self.buffer.task_done()
             return buffer
 

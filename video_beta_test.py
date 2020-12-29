@@ -1,12 +1,13 @@
 import media
 import tkinter
-import sys
+import sys, os
 
 def b1_handle():
     m._ffmpeg.command_q.put("exit")
     m.canvas.after_cancel(m.aid)
     r.destroy()
-    exit()
+    os._exit(0)
+    sys.exit(0)
 
 status = 0
 
